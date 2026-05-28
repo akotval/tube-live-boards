@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>London Tube Live Boards</title>
+<title>London Tube - Live Boards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -194,11 +194,11 @@
     border-right:1px solid var(--line-soft); margin-right:4px;
   }
   .status-track-wrap { overflow:hidden; flex:1 1 auto; -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent); mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent); }
-  .status-track { display:inline-flex; gap:8px; padding:7px 0; white-space:nowrap; animation:ticker 60s linear infinite; }
+  .status-track { display:inline-flex; padding:7px 0; white-space:nowrap; will-change:transform; animation:ticker 80s linear infinite; }
   .status-track:hover { animation-play-state:paused; }
-  @keyframes ticker { from { transform:translateX(0);} to { transform:translateX(-50%);} }
+  @keyframes ticker { from { transform:translate3d(0,0,0);} to { transform:translate3d(-50%,0,0);} }
   .status-pill {
-    display:inline-flex; align-items:center; gap:7px;
+    display:inline-flex; align-items:center; gap:7px; margin-right:8px;
     font-size:12px; font-weight:600; letter-spacing:0.02em;
     padding:4px 11px 4px 8px; border-radius:20px;
     background:var(--panel); border:1px solid var(--line);
@@ -207,20 +207,148 @@
   .status-pill .lname { color:var(--txt-dim); }
   .status-pill .sdot { width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
   .status-pill .sname { font-size:11px; color:var(--txt); opacity:0.85; }
+  .status-pill.has-detail { cursor:pointer; }
+  .status-pill.has-detail:hover { border-color:#2b3647; background:var(--panel-2); }
+
+  /* status badge on the header button */
+  .status-badge {
+    min-width:8px; height:8px; border-radius:50%; background:var(--green);
+    box-shadow:0 0 8px var(--green); display:inline-block; margin-left:2px;
+  }
+  .status-badge.warn { background:var(--amber); box-shadow:0 0 8px var(--amber); }
+  .status-badge.bad  { background:var(--orange); box-shadow:0 0 8px var(--orange); }
+  .status-badge.crit { background:var(--red); box-shadow:0 0 8px var(--red); }
+  .status-badge.count {
+    width:auto; height:auto; border-radius:9px; padding:1px 6px;
+    font-family:'Roboto Mono',monospace; font-size:10px; font-weight:700;
+    color:#1a1402; box-shadow:none;
+  }
+
+  /* status detail modal */
+  .status-modal { position:fixed; inset:0; z-index:1000; display:flex; align-items:flex-start; justify-content:center; }
+  .status-modal[hidden]{ display:none; }
+  .status-modal-backdrop { position:absolute; inset:0; background:rgba(4,6,10,0.66); backdrop-filter:blur(4px); animation:fadeIn .2s ease; }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+  .status-modal-card {
+    position:relative; margin-top:min(8vh,80px); width:min(620px, 92vw);
+    max-height:82vh; display:flex; flex-direction:column;
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,0.6); animation:cardIn .24s ease;
+  }
+  @keyframes cardIn { from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
+  .status-modal-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; border-bottom:1px solid var(--line);
+  }
+  .status-modal-head h2 {
+    font-family:'London Underground', sans-serif; font-weight:700;
+    font-size:20px; letter-spacing:0.02em; color:var(--txt);
+  }
+  .status-modal-body { overflow-y:auto; padding:8px 0; }
+  .status-row {
+    display:flex; align-items:flex-start; gap:12px;
+    padding:13px 18px; border-bottom:1px solid var(--line-soft);
+  }
+  .status-row:last-child { border-bottom:none; }
+  .status-row .sr-line { width:5px; align-self:stretch; border-radius:3px; flex:0 0 auto; min-height:32px; }
+  .status-row .sr-main { flex:1 1 auto; min-width:0; }
+  .status-row .sr-name {
+    font-family:'London Underground',sans-serif; font-weight:500; font-size:16px;
+    color:var(--txt); display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .status-row .sr-sev {
+    font-family:'Roboto Mono',monospace; font-size:10px; letter-spacing:0.08em;
+    text-transform:uppercase; padding:2px 7px; border-radius:5px; font-weight:700;
+  }
+  .sev-good { background:rgba(43,213,118,0.14); color:var(--green); }
+  .sev-minor{ background:rgba(247,201,72,0.14); color:var(--amber); }
+  .sev-bad  { background:rgba(255,159,28,0.16); color:var(--orange); }
+  .sev-crit { background:rgba(255,92,92,0.16); color:var(--red); }
+  .status-row .sr-reason {
+    margin-top:6px; font-size:13px; line-height:1.5; color:var(--txt-dim);
+  }
+  .status-modal-foot {
+    padding:11px 18px; border-top:1px solid var(--line);
+    font-family:'Roboto Mono',monospace; font-size:10px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--txt-faint); text-align:center;
+  }
+  .status-row.flash { animation:rowFlash 1.4s ease; }
+  @keyframes rowFlash { 0%,100%{background:transparent;} 30%{background:rgba(247,201,72,0.10);} }
   .s-good .sdot{ background:var(--green); box-shadow:0 0 8px var(--green);} 
   .s-minor .sdot{ background:var(--amber); box-shadow:0 0 8px var(--amber);} 
   .s-severe .sdot,.s-part .sdot{ background:var(--orange); box-shadow:0 0 8px var(--orange);} 
   .s-susp .sdot,.s-closed .sdot{ background:var(--red); box-shadow:0 0 8px var(--red);} 
 
-  /* ===================== GRID ===================== */
-  main { max-width:1280px; margin:0 auto; padding:clamp(16px,2.4vw,30px) clamp(14px,3vw,34px) 70px; }
+  /* ===================== LAYOUT ===================== */
+  main { max-width:1680px; margin:0 auto; padding:clamp(16px,2.4vw,30px) clamp(14px,3vw,34px) 70px; }
+  .layout {
+    display:grid; gap:clamp(14px,1.8vw,24px);
+    grid-template-columns: minmax(280px, 340px) 1fr;
+    align-items:start;
+  }
   .grid {
     display:grid; gap:clamp(14px,1.8vw,24px);
     grid-template-columns:repeat(2, 1fr);
   }
+  @media (max-width:1080px){
+    .layout { grid-template-columns:1fr; }
+    .status-board { order:2; }   /* drop sidebar below grid on narrow screens */
+  }
   @media (max-width:780px){ .grid { grid-template-columns:1fr;} }
 
   body.compact .grid { gap:12px; }
+  body.compact .layout { gap:12px; }
+
+  /* ===================== STATUS SIDEBAR ===================== */
+  .status-board {
+    background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    box-shadow:0 18px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
+    position:sticky; top:128px;
+    max-height:calc(100vh - 150px); display:flex; flex-direction:column;
+  }
+  @media (max-width:1080px){ .status-board { position:static; max-height:none; } }
+  .status-board-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:15px 16px 13px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(255,255,255,0.025), transparent);
+  }
+  .status-board-head h2 {
+    font-family:'London Underground', sans-serif; font-weight:700;
+    font-size:18px; letter-spacing:0.02em; color:var(--txt); text-transform:uppercase;
+  }
+  .sb-updated {
+    font-family:'Roboto Mono',monospace; font-size:9.5px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--txt-faint);
+  }
+  .status-board-body { overflow-y:auto; flex:1 1 auto; }
+  .sb-loading { padding:24px 16px; text-align:center; color:var(--txt-faint); font-size:13px; }
+  .sb-row {
+    display:flex; align-items:flex-start; gap:11px;
+    padding:11px 15px; border-bottom:1px solid var(--line-soft);
+  }
+  .sb-row:last-child { border-bottom:none; }
+  .sb-row .sb-line { width:5px; align-self:stretch; min-height:30px; border-radius:3px; flex:0 0 auto; }
+  .sb-row .sb-main { flex:1 1 auto; min-width:0; }
+  .sb-row .sb-name {
+    font-family:'London Underground',sans-serif; font-weight:500; font-size:15px;
+    color:var(--txt); line-height:1.15;
+  }
+  .sb-row .sb-sev {
+    display:inline-block; margin-top:4px;
+    font-family:'Roboto Mono',monospace; font-size:9.5px; letter-spacing:0.06em;
+    text-transform:uppercase; padding:2px 6px; border-radius:4px; font-weight:700;
+  }
+  .sev-good { background:rgba(43,213,118,0.14); color:var(--green); }
+  .sev-minor{ background:rgba(247,201,72,0.14); color:var(--amber); }
+  .sev-bad  { background:rgba(255,159,28,0.16); color:var(--orange); }
+  .sev-crit { background:rgba(255,92,92,0.16); color:var(--red); }
+  .sb-row .sb-reason {
+    margin-top:6px; font-size:12px; line-height:1.45; color:var(--txt-dim);
+  }
+  /* good-service rows are condensed (no reason text) */
+  .sb-row.is-good .sb-name { font-weight:400; color:var(--txt-dim); }
 
   /* ===================== BOARD ===================== */
   .board {
@@ -301,8 +429,16 @@
   .sugg:last-child { border-bottom:none; }
   .sugg:hover, .sugg.active { background:var(--line); }
   .sugg .sg-name { font-size:14px; font-weight:500; flex:1 1 auto; }
-  .sugg .sg-lines { display:inline-flex; gap:3px; flex:0 0 auto; }
+  .sugg .sg-lines { display:inline-flex; gap:3px; flex:0 0 auto; align-items:center; }
   .sugg .sg-lines i { width:14px; height:5px; border-radius:3px; }
+  .sugg .sg-roundel {
+    width:12px; height:12px; border-radius:50%;
+    border:3px solid var(--central); position:relative; display:inline-block;
+  }
+  .sugg .sg-roundel::after {
+    content:""; position:absolute; left:-2px; right:-2px; top:50%; transform:translateY(-50%);
+    height:2.5px; background:var(--piccadilly);
+  }
   .sugg-empty, .sugg-loading { padding:13px; text-align:center; color:var(--txt-faint); font-size:13px; }
 
   /* arrivals body */
@@ -449,7 +585,7 @@
     <div class="brand">
       <div class="roundel"><div class="ring"></div><div class="bar"></div></div>
       <div class="titles">
-        <h1>London Tube Live Boards</h1>
+        <h1>London Tube - Live Boards</h1>
         <div class="sub">Tube · Elizabeth · DLR · Overground · Tram</div>
       </div>
     </div>
@@ -476,6 +612,7 @@
       </button>
     </div>
   </div>
+
   <div class="status-strip">
     <div class="status-strip-inner">
       <div class="status-label">Line Status</div>
@@ -489,7 +626,18 @@
 </header>
 
 <main>
-  <div class="grid" id="grid"></div>
+  <div class="layout">
+    <aside class="status-board" id="statusBoard">
+      <div class="status-board-head">
+        <h2>Line Status</h2>
+        <span class="sb-updated" id="statusBoardUpdated"></span>
+      </div>
+      <div class="status-board-body" id="statusBoardBody">
+        <div class="sb-loading">Loading line status…</div>
+      </div>
+    </aside>
+    <div class="grid" id="grid"></div>
+  </div>
 </main>
 
 <footer class="page-foot">
@@ -513,20 +661,20 @@ const API = "https://api.tfl.gov.uk";
 const REFRESH_MS = 30000;
 const MAX_ARRIVALS = 10;
 const NUM_BOARDS = 4;
-const LS_KEY = "tubeLiveBoards.v4";   // v2: multi-mode
+const LS_KEY = "tubeLiveBoards.v7";   // v2: multi-mode
 
 /* Modes this app shows. Order also controls status-ticker grouping. */
-const MODES = ["tube","elizabeth-line","dlr","london-overground","tram"];
+const MODES = ["tube","elizabeth-line","dlr","london-overground"];
 const MODE_SET = new Set(MODES);
 const MODES_QS = MODES.join(",");
 /* The Line/Mode/.../Status endpoint uses "overground", NOT "london-overground"
    (which is the StopPoint mode name). One bad mode 400s the whole request,
    so this list is kept separate. */
-const STATUS_MODES_QS = ["tube","elizabeth-line","dlr","overground","tram"].join(",");
+const STATUS_MODES_QS = ["tube","elizabeth-line","dlr","overground"].join(",");
 /* Short label shown on each arrival row so you can tell modes apart. */
 const MODE_LABEL = {
   "tube":"TUBE", "elizabeth-line":"ELIZ", "dlr":"DLR",
-  "london-overground":"OVG", "tram":"TRAM"
+  "london-overground":"OVG"
 };
 /* How many child stops we'll query per hub, to keep request volume sane. */
 const MAX_CHILD_FETCH = 6;
@@ -557,8 +705,15 @@ const LINE_NAMES = {
 function lineColour(id){
   if (id === "elizabeth-line") id = "elizabeth";
   if (id === "overground") id = "london-overground";
-  return LINE_COLOURS[id] || "#7c8aa0";
+  return LINE_COLOURS[id] || MODE_COLOURS[id] || "#7c8aa0";
 }
+/* Colour for a whole mode, used in the search dropdown where only the mode
+   (e.g. "tube") is known rather than the specific line. Tube uses the
+   corporate Underground blue. */
+const MODE_COLOURS = {
+  tube:"#10069F", "elizabeth-line":"#6950A1", elizabeth:"#6950A1",
+  dlr:"#00A4A7", "london-overground":"#EE7C0E", overground:"#EE7C0E"
+};
 function lineName(id){ return LINE_NAMES[id] || (id ? id.replace(/-/g," ") : "Line"); }
 /* Lines that read better with dark text on their tag */
 const LIGHT_LINES = new Set(["circle","jubilee","hammersmith-city","waterloo-city","lioness"]);
@@ -568,10 +723,10 @@ function lineTextColour(id){ return LIGHT_LINES.has(id) ? "#1a1a1a" : "#ffffff";
    DEFAULT STATIONS  (NaPTAN StopPoint IDs — Underground hubs)
    ============================================================ */
 const DEFAULT_STATIONS = [
-  { id:"940GZZLUKSX", name:"King's Cross St. Pancras" },
-  { id:"940GZZLULVT", name:"Liverpool Street" },
-  { id:"940GZZLUSTD", name:"Stratford" },
-  { id:"940GZZLUPAC", name:"Paddington" }
+  { id:"940GZZLUPSG", name:"Parsons Green" },
+  { id:"940GZZLUPAC", name:"Paddington" },
+  { id:"940GZZLUECT", name:"Earl's Court" },
+  { id:"940GZZLUTCR", name:"Tottenham Court Road" }
 ];
 
 /* ============================================================
@@ -758,11 +913,13 @@ function wireBoard(el, i){
       sugg.classList.add("show"); return;
     }
     sugg.innerHTML = results.map((r,ix)=>{
-      // Prefer line colours if present, else fall back to mode colours.
-      const src = (r.lines && r.lines.length) ? r.lines
-                : (r.modes||[]).map(m => m==="overground" ? "london-overground" : m);
-      const dots = src.slice(0,6).map(x=>
-        `<i style="background:${lineColour(x)}"></i>`).join("");
+      // Show real line colours (e.g. District green) from the enriched line ids.
+      // Fall back to mode colours only if a station somehow has no line data.
+      let src = (r.lines && r.lines.length)
+        ? r.lines
+        : (r.modes||[]).map(m => m==="overground" ? "london-overground" : m);
+      const dots = [...new Set(src)].slice(0,6).map(x=>
+        `<i style="background:${lineColour(x)}" title="${escapeHTML(lineName(x))}"></i>`).join("");
       return `<div class="sugg ${ix===activeIdx?'active':''}" data-ix="${ix}">
         <span class="sg-name">${escapeHTML(r.name)}</span>
         <span class="sg-lines">${dots}</span>
@@ -855,7 +1012,38 @@ async function searchStations(query){
     modes: (m.modes||[]).filter(mode => MODE_SET.has(mode) || mode==="overground"),
     lines: (m.lines||[]).map(l=>l.id).filter(id=>LINE_COLOURS[id])
   }));
+
+  // Enrich the top results with their real rail/tube line ids (e.g. "district")
+  // so the dropdown shows true line colours, not a generic mode colour. We cap
+  // concurrency and cache aggressively to avoid hammering the API.
+  await Promise.all(out.slice(0, 10).map(async r=>{
+    if (r.lines && r.lines.length) return;          // already have lines
+    const ls = await fetchStationLineIds(r.id);
+    if (ls && ls.length) r.lines = ls;
+  }));
+
   searchCache.set(key, out);
+  return out;
+}
+
+/* Fetch the supported-mode line ids for a station id (cached). Reads the
+   StopPoint's lineModeGroups, which reliably lists lines like "district". */
+const lineIdCache = new Map();
+async function fetchStationLineIds(id){
+  if (lineIdCache.has(id)) return lineIdCache.get(id);
+  let out = [];
+  try {
+    const sp = await fetchJSON(`${API}/StopPoint/${encodeURIComponent(id)}`);
+    const groups = sp.lineModeGroups || [];
+    groups.forEach(g => {
+      if (MODE_SET.has(g.modeName) || g.modeName === "overground"){
+        (g.lineIdentifier||[]).forEach(l => out.push(l));
+      }
+    });
+    // de-dupe, keep only ones we can colour
+    out = [...new Set(out)].filter(l => LINE_COLOURS[l] || l==="elizabeth" || l==="dlr");
+  } catch(e){ /* leave empty */ }
+  lineIdCache.set(id, out);
   return out;
 }
 function cleanName(n){
@@ -873,7 +1061,9 @@ function cleanName(n){
    with spread-out countdowns), and 9400Z (tram). Hubs (HUB...) and ICS ids
    return empty arrivals, so any selected station is resolved to its child stops. */
 function naptanServesArrivals(id){
-  return typeof id === "string" && /^(940G|910G|9400Z)/i.test(id);
+  if (typeof id !== "string") return false;
+  if (/^940GZZCR/i.test(id)) return false; // Croydon tram stops — excluded
+  return /^(940G|910G|9400Z)/i.test(id);
 }
 function isRailStop(id){ return typeof id === "string" && /^910G/i.test(id); }
 
@@ -886,43 +1076,86 @@ async function resolveStopChildren(id){
   try {
     const sp = await fetchJSON(`${API}/StopPoint/${encodeURIComponent(id)}`);
     stops = collectModeStops(sp);
-    // If this stop belongs to a hub, expand the hub to capture sibling modes
-    // (e.g. the Elizabeth/DLR stops at the same station as a Tube platform).
+    // Expand the hub to capture sibling modes at the same station (e.g. the
+    // District platform at a station whose search match was the tram stop, or
+    // the Elizabeth/DLR stops alongside a Tube platform).
     const hub = sp.hubNaptanCode;
     if (hub && hub !== id){
       try {
         const hsp = await fetchJSON(`${API}/StopPoint/${encodeURIComponent(hub)}`);
-        const hubStops = collectModeStops(hsp);
-        if (hubStops.length) stops = stops.concat(hubStops);
+        stops = stops.concat(collectModeStops(hsp));
       } catch(e){ /* hub lookup optional */ }
     }
-    // If the node itself is a plain arrivals-capable stop and we found nothing
-    // deeper, just use it directly.
+    // Last resort: the node itself is a plain arrivals-capable stop.
     if (!stops.length && naptanServesArrivals(sp.naptanId || sp.id)){
       stops = [{ id: sp.naptanId || sp.id, modes: (sp.modes||[]).filter(m=>MODE_SET.has(m)) }];
     }
   } catch(e){ /* fall through – caller falls back to raw id */ }
-  // de-dupe by id, cap volume
-  const seen = new Set(); const out = [];
-  for (const s of stops){
-    if (s.id && !seen.has(s.id)){ seen.add(s.id); out.push(s); }
-    if (out.length >= MAX_CHILD_FETCH) break;
-  }
+
+  const out = pickBestStops(stops);
   if (out.length) resolveCache.set(id, out);
   return out;
 }
 
-/* Recursively gather child StopPoints that serve one of our supported modes. */
-function collectModeStops(node, acc){
+/* Choose at most one stop per mode, in a priority order, so a station with many
+   tram platforms (or several rail platforms) doesn't crowd out its Tube/District
+   stop. Tube first because it's the headline mode for this app. */
+const MODE_PRIORITY = ["tube","dlr","elizabeth-line","london-overground"];
+function pickBestStops(stops){
+  // map each stop to the highest-priority mode it serves
+  const byMode = {};
+  for (const s of stops){
+    if (!s.id) continue;
+    // pick this stop's best mode
+    let best = null, bestRank = 99;
+    for (const m of (s.modes||[])){
+      const norm = (m === "overground") ? "london-overground" : m;
+      const rank = MODE_PRIORITY.indexOf(norm);
+      if (rank !== -1 && rank < bestRank){ bestRank = rank; best = norm; }
+    }
+    if (best === null) continue;
+    // 940GZZLU (Tube) stops are the most reliable; prefer them within a mode
+    const prefer = /^940GZZLU/i.test(s.id);
+    if (!byMode[best] || (prefer && !/^940GZZLU/i.test(byMode[best].id))){
+      byMode[best] = s;
+    }
+  }
+  // assemble in priority order, capped
+  const out = [];
+  const seen = new Set();
+  for (const m of MODE_PRIORITY){
+    const s = byMode[m];
+    if (s && !seen.has(s.id)){ seen.add(s.id); out.push(s); }
+    if (out.length >= MAX_CHILD_FETCH) break;
+  }
+  return out;
+}
+
+/* Recursively gather child StopPoints that serve one of our supported modes.
+   We prefer STATION-level stops (NaptanMetroStation / NaptanRailStation, i.e.
+   the 940G/910G parent) over individual platforms, so a station with several
+   tram or rail platforms contributes one stop per mode, not many. We also pull
+   the real line ids (e.g. "district") from lineModeGroups for accurate colour. */
+function collectModeStops(node, acc, depth){
   acc = acc || [];
+  depth = depth || 0;
   if (!node || typeof node !== "object") return acc;
   const id = node.naptanId || node.id;
-  const modes = (node.modes || []).filter(m => MODE_SET.has(m));
-  if (id && naptanServesArrivals(id) && modes.length){
-    acc.push({ id, modes });
+  const modes = (node.modes || []).filter(m => MODE_SET.has(m) || m === "overground");
+  // A station-level arrivals stop: 940G... or 910G... (not the 9400Z/9100 platforms)
+  const isStationLevel = typeof id === "string" && /^(940G|910G)/i.test(id);
+  if (id && isStationLevel && modes.length){
+    // gather line ids for this stop's modes from lineModeGroups
+    const lineIds = [];
+    (node.lineModeGroups||[]).forEach(g => {
+      if (MODE_SET.has(g.modeName) || g.modeName==="overground"){
+        (g.lineIdentifier||[]).forEach(l => lineIds.push(l));
+      }
+    });
+    acc.push({ id, modes, lines: lineIds });
   }
   const kids = node.children || [];
-  for (const k of kids) collectModeStops(k, acc);
+  for (const k of kids) collectModeStops(k, acc, depth+1);
   return acc;
 }
 
@@ -1152,6 +1385,8 @@ function startCountdown(i){
 /* ============================================================
    LINE STATUS (ticker)
    ============================================================ */
+let lastStatusSig = "";
+let statusData = [];
 async function loadStatus(){
   const track = document.getElementById("statusTrack");
   const renderPills = (data)=>{
@@ -1159,7 +1394,8 @@ async function loadStatus(){
       const s = (line.lineStatuses && line.lineStatuses[0]) || {};
       const desc = s.statusSeverityDescription || "Unknown";
       const cls = statusClass(desc);
-      return `<span class="status-pill ${cls}">
+      const hasDetail = !statusClass(desc).includes("good");
+      return `<span class="status-pill ${cls} ${hasDetail?'has-detail':''}" data-line="${escapeHTML(line.id)}">
         <span class="ldot" style="background:${lineColour(line.id)}"></span>
         <span class="lname">${escapeHTML(line.name)}</span>
         <span class="sdot"></span>
@@ -1170,11 +1406,8 @@ async function loadStatus(){
   try {
     let data;
     try {
-      // Try the combined call first (one request).
       data = await fetchJSON(`${API}/Line/Mode/${STATUS_MODES_QS}/Status`);
     } catch(combinedErr){
-      // If the combined call fails (e.g. a mode is rejected), fetch each mode
-      // separately and keep whatever succeeds, so the ticker still shows.
       const modes = STATUS_MODES_QS.split(",");
       const settled = await Promise.allSettled(
         modes.map(m => fetchJSON(`${API}/Line/Mode/${m}/Status`))
@@ -1183,11 +1416,59 @@ async function loadStatus(){
       settled.forEach(r => { if (r.status === "fulfilled" && Array.isArray(r.value)) data = data.concat(r.value); });
       if (!data.length) throw combinedErr;
     }
-    const pills = renderPills(data);
-    track.innerHTML = pills + pills; // duplicate for seamless loop
+    statusData = data;
+
+    // Only rebuild when the status actually changed, so the ticker animation
+    // isn't reset on every 30s refresh and the sidebar doesn't flicker.
+    const sig = data.map(l => l.id+":"+((l.lineStatuses&&l.lineStatuses[0]&&l.lineStatuses[0].statusSeverity)||"")).join("|");
+    if (sig !== lastStatusSig){
+      lastStatusSig = sig;
+      const pills = renderPills(data);
+      track.innerHTML = pills + pills; // duplicate for seamless loop
+      renderStatusBoard(data);
+    }
   } catch(e){
-    track.innerHTML = `<span class="status-pill s-minor"><span class="sdot"></span><span class="sname">LINE STATUS UNAVAILABLE — RETRYING</span></span>`;
+    if (lastStatusSig !== "__err"){
+      lastStatusSig = "__err";
+      track.innerHTML = `<span class="status-pill s-minor"><span class="sdot"></span><span class="sname">LINE STATUS UNAVAILABLE — RETRYING</span></span>`;
+      const sbBody = document.getElementById("statusBoardBody");
+      if (sbBody) sbBody.innerHTML = `<div class="sb-loading">Line status unavailable — retrying…</div>`;
+    }
   }
+}
+
+/* Render the persistent left-hand status board: disrupted lines first (with
+   the specific reason), then good-service lines condensed at the bottom. */
+function renderStatusBoard(data){
+  const body = document.getElementById("statusBoardBody");
+  const upd = document.getElementById("statusBoardUpdated");
+  if (!body) return;
+  const rows = (data||[]).slice().sort((a,b)=>{
+    const ba = severityBucket(((a.lineStatuses||[])[0]||{}).statusSeverityDescription);
+    const bb = severityBucket(((b.lineStatuses||[])[0]||{}).statusSeverityDescription);
+    if (sevSeverityRank(bb) !== sevSeverityRank(ba)) return sevSeverityRank(bb) - sevSeverityRank(ba);
+    return (a.name||"").localeCompare(b.name||"");
+  });
+  body.innerHTML = rows.map(line=>{
+    const statuses = line.lineStatuses || [];
+    const s = statuses[0] || {};
+    const desc = s.statusSeverityDescription || "Unknown";
+    const bucket = severityBucket(desc);
+    const sevCls = bucket==="good" ? "sev-good" : bucket==="minor" ? "sev-minor" : bucket==="bad" ? "sev-bad" : "sev-crit";
+    const reasons = [...new Set(statuses.map(st => st.reason).filter(Boolean))];
+    const reasonHtml = (bucket!=="good" && reasons.length)
+      ? reasons.map(r => `<div class="sb-reason">${escapeHTML(cleanReason(r, line.name))}</div>`).join("")
+      : "";
+    return `<div class="sb-row ${bucket==='good'?'is-good':''}">
+      <span class="sb-line" style="background:${lineColour(line.id)}"></span>
+      <div class="sb-main">
+        <div class="sb-name">${escapeHTML(line.name)}</div>
+        <span class="sb-sev ${sevCls}">${escapeHTML(desc)}</span>
+        ${reasonHtml}
+      </div>
+    </div>`;
+  }).join("") || `<div class="sb-loading">No line status to show.</div>`;
+  if (upd) upd.textContent = "Upd " + nowLondonHM();
 }
 function statusClass(desc){
   const d = desc.toLowerCase();
@@ -1199,6 +1480,29 @@ function statusClass(desc){
   if (d.includes("closed")) return "s-closed";
   return "s-minor";
 }
+
+/* Severity buckets for the detail panel + header badge. */
+function severityBucket(desc){
+  const d = (desc||"").toLowerCase();
+  if (d.includes("good")) return "good";
+  if (d.includes("minor")) return "minor";
+  if (d.includes("severe") || d.includes("part")) return "bad";
+  if (d.includes("suspend") || d.includes("closed")) return "crit";
+  return "minor";
+}
+function sevSeverityRank(b){ return { good:0, minor:1, bad:2, crit:3 }[b] || 0; }
+
+/* TfL reasons often start with the line name repeated ("Central Line: ..."),
+   trim that for cleaner reading. */
+function cleanReason(reason, lineName){
+  let r = String(reason).trim();
+  if (lineName){
+    const re = new RegExp("^"+lineName.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*(line)?\\s*[:\\-–]\\s*","i");
+    r = r.replace(re, "");
+  }
+  return r;
+}
+function cssEscape(s){ return String(s).replace(/[^a-zA-Z0-9_-]/g, "\\$&"); }
 
 /* ============================================================
    GLOBAL REFRESH
